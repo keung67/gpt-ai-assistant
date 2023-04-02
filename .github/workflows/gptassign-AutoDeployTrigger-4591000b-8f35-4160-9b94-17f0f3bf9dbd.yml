@@ -1,0 +1,83 @@
+name: Trigger auto deployment for gptassign
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/gptassign-AutoDeployTrigger-4591000b-8f35-4160-9b94-17f0f3bf9dbd.yml'
+
+  # Allow mannually trigger 
+  workflow_dispatch:      
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Create .env file
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_CHANNEL_SECRET: ${{ secrets.LINE_CHANNEL_SECRET }}
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+        run: |
+           touch .env
+                echo APP_DEBUG=true > .env
+                echo APP_PORT=443 >> .env
+                echo APP_API_TIMEOUT=60000 >> .env
+                echo APP_MAX_PROMPT_MESSAGES=200 >> .env
+                echo APP_MAX_PROMPT_TOKENS=1500 >> .env
+                echo OPENAI_TIMEOUT=60000 >> .env
+                echo OPENAI_API_KEY="$OPENAI_API_KEY" >> .env
+                echo OPENAI_COMPLETION_MAX_TOKENS=1024 >> .env
+                echo LINE_TIMEOUT=60000 >> .env
+                echo LINE_CHANNEL_ACCESS_TOKEN="$LINE_CHANNEL_ACCESS_TOKEN" >> .env
+                echo LINE_CHANNEL_SECRET="$LINE_CHANNEL_SECRET" >> .env
+                echo SERPAPI_TIMEOUT=60000 >> .env
+                echo SERPAPI_API_KEY="$SERPAPI_API_KEY" >> .env
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to container registry
+        uses: docker/login-action@v1
+        with:
+          registry: registry.hub.docker.com
+          username: ${{ secrets.GPTASSIGN_REGISTRY_USERNAME }}
+          password: ${{ secrets.GPTASSIGN_REGISTRY_PASSWORD }}
+
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: registry.hub.docker.com/keungliang/gpt-ai-assistant:latest
+          file: ./Dockerfile
+          context: ./
+
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.GPTASSIGN_AZURE_CREDENTIALS }}
+
+
+      - name: Deploy to containerapp
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az config set extension.use_dynamic_install=yes_without_prompt
+            az containerapp registry set -n gptassign -g blue --server registry.hub.docker.com --username  ${{ secrets.GPTASSIGN_REGISTRY_USERNAME }} --password ${{ secrets.GPTASSIGN_REGISTRY_PASSWORD }}
+            az containerapp update -n gptassign -g blue --image registry.hub.docker.com/keungliang/gpt-ai-assistant:latest
