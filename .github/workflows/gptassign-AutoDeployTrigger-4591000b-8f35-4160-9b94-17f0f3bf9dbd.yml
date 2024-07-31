@@ -30,6 +30,7 @@ jobs:
           LINE_CHANNEL_SECRET: ${{ secrets.LINE_CHANNEL_SECRET }}
           SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
           OPENAI_COMPLETION_MODEL: ${{ secrets.OPENAI_COMPLETION_MODEL }}
+          OPENAI_VISION_MODEL: ${{ secrets.OPENAI_VISION_MODEL }}
         run: |
            touch .env
                 echo APP_DEBUG=true > .env
@@ -47,6 +48,7 @@ jobs:
                 echo SERPAPI_TIMEOUT=60000 >> .env
                 echo SERPAPI_API_KEY="$SERPAPI_API_KEY" >> .env
                 echo OPENAI_COMPLETION_MODEL="$OPENAI_COMPLETION_MODEL" >> .env
+                echo OPENAI_VISION_MODEL="$OPENAI_VISION_MODEL" >> .env
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
