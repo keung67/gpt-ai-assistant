@@ -33,19 +33,10 @@ jobs:
           OPENAI_VISION_MODEL: ${{ secrets.OPENAI_VISION_MODEL }}
         run: |
            touch .env
-                echo APP_DEBUG=true > .env
-                echo APP_PORT=443 >> .env
-                echo APP_API_TIMEOUT=60000 >> .env
-                echo APP_MAX_PROMPT_MESSAGES=200 >> .env
-                echo APP_MAX_PROMPT_TOKENS=1800 >> .env
-                echo OPENAI_TIMEOUT=60000 >> .env
                 echo OPENAI_API_KEY="$OPENAI_API_KEY" >> .env
                 echo OPENAI_BASE_URL="$OPENAI_BASE_URL" >> .env
-                echo OPENAI_COMPLETION_MAX_TOKENS=1500 >> .env
-                echo LINE_TIMEOUT=60000 >> .env
                 echo LINE_CHANNEL_ACCESS_TOKEN="$LINE_CHANNEL_ACCESS_TOKEN" >> .env
                 echo LINE_CHANNEL_SECRET="$LINE_CHANNEL_SECRET" >> .env
-                echo SERPAPI_TIMEOUT=60000 >> .env
                 echo SERPAPI_API_KEY="$SERPAPI_API_KEY" >> .env
                 echo OPENAI_COMPLETION_MODEL="$OPENAI_COMPLETION_MODEL" >> .env
                 echo OPENAI_VISION_MODEL="$OPENAI_VISION_MODEL" >> .env
