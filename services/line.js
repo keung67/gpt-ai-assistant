@@ -44,8 +44,6 @@ const removeMarkdown = (text) => {
     .replace(/!\[([^\]]+)\]\(([^)]+)\)/g, '')
     // Remove horizontal rules
     .replace(/^[\-=_]{3,}\s*$/gm, '')
-    // Clean up extra whitespace
-    .replace(/\n\s*\n/g, '\n')
     .trim();
 };
 
